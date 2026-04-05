@@ -32,6 +32,7 @@ import {
 import { Search, Plus, Edit2, Trash2, Laptop, Info, BrainCircuit, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { summarizeAssetHistory } from '@/ai/flows/asset-history-summarizer';
+import { cn } from '@/lib/utils';
 
 export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
