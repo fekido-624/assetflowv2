@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { store } from '@/lib/store';
+import { getPrinters, getStaff, addPrinter, updatePrinter } from '@/lib/actions';
 import { Printer, AcquisitionType, Staff } from '@/lib/types';
 import { 
   Table, 
@@ -57,12 +58,14 @@ export default function PrintersPage() {
     refresh();
   }, []);
 
-  const refresh = () => {
-    setPrinters(store.getPrinters());
-    setStaffList(store.getStaff());
+  const refresh = async () => {
+    const printerData = await getPrinters();
+    const staffData = await getStaff();
+    setPrinters(printerData as Printer[]);
+    setStaffList(staffData as Staff[]);
   };
 
-  const filteredPrinters = printers.filter(p => {
+  const filteredPrinters = printers.filter((p: Printer) => {
     const searchTerm = search.toLowerCase();
     return (
       p.no_siri.toLowerCase().includes(searchTerm) ||
@@ -71,12 +74,12 @@ export default function PrintersPage() {
     );
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingPrinter) {
-      store.updatePrinter(editingPrinter.id, formData);
+      await updatePrinter(editingPrinter.id, formData);
     } else {
-      store.addPrinter(formData);
+      await addPrinter(formData);
     }
     setIsModalOpen(false);
     setEditingPrinter(null);
@@ -85,7 +88,17 @@ export default function PrintersPage() {
 
   const startEdit = (p: Printer) => {
     setEditingPrinter(p);
-    setFormData({ ...p });
+    setFormData({
+      staff_id: p.staff_id,
+      jenis_perolehan: p.jenis_perolehan,
+      tahun_perolehan: p.tahun_perolehan,
+      no_siri: p.no_siri,
+      jenama: p.jenama,
+      jenis: p.jenis,
+      kod_toner: p.kod_toner,
+      no_pendaftaran: p.no_pendaftaran || '',
+      kod_sewaan: p.kod_sewaan || ''
+    });
     setIsModalOpen(true);
   };
 

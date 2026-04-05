@@ -11,7 +11,8 @@ import {
   History, 
   FileText, 
   LogOut,
-  ChevronLeft
+  ChevronLeft,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { store } from '@/lib/store';
@@ -78,6 +79,19 @@ export function SidebarNav() {
             )}>
               <History className="w-5 h-5" />
               <span>Audit Trail</span>
+            </div>
+          </Link>
+        )}
+        {user.role === 'Admin' && (
+          <Link href="/users">
+            <div className={cn(
+              "flex items-center space-x-3 px-4 py-3 rounded-md transition-all font-medium",
+              pathname.startsWith('/users') 
+                ? "bg-primary text-white shadow-md shadow-primary/20" 
+                : "text-muted-foreground hover:bg-secondary hover:text-primary"
+            )}>
+              <ShieldCheck className="w-5 h-5" />
+              <span>User Management</span>
             </div>
           </Link>
         )}

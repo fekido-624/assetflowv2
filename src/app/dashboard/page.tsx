@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { store } from '@/lib/store';
+import { getStaff, getAssets, getPrinters } from '@/lib/actions';
+import { Asset, Staff } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Monitor, Printer, PieChart, BarChart3, TrendingUp } from 'lucide-react';
 import { 
@@ -27,29 +28,33 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    const staff = store.getStaff();
-    const assets = store.getAssets();
-    const printers = store.getPrinters();
+    const fetchData = async () => {
+      const staff = await getStaff() as Staff[];
+      const assets = await getAssets() as Asset[];
+      const printers = await getPrinters();
 
-    const wings = ['Wing 1', 'Wing 2', 'Wing 3', 'Wing 4'];
-    const wingData = wings.map(w => ({
-      name: w,
-      total: assets.filter(a => staff.find(s => s.id === a.staff_id)?.wing === w).length
-    }));
+      const wings = ['Wing 1', 'Wing 2', 'Wing 3', 'Wing 4'];
+      const wingData = wings.map(w => ({
+        name: w,
+        total: assets.filter((a: Asset) => staff.find((s: Staff) => s.id === a.staff_id)?.wing === w).length
+      }));
 
-    const types = ['Sewaan Berpusat', 'Sewaan Sendiri', 'Hak Milik Kerajaan'];
-    const typeData = types.map(t => ({
-      name: t,
-      value: assets.filter(a => a.jenis_perolehan === t).length
-    }));
+      const types = ['Sewaan Berpusat', 'Sewaan Sendiri', 'Hak Milik Kerajaan'];
+      const typeData = types.map(t => ({
+        name: t,
+        value: assets.filter((a: Asset) => a.jenis_perolehan === t).length
+      }));
 
-    setStats({
-      staff: staff.length,
-      assets: assets.length,
-      printers: printers.length,
-      byWing: wingData,
-      byType: typeData
-    });
+      setStats({
+        staff: staff.length,
+        assets: assets.length,
+        printers: printers.length,
+        byWing: wingData,
+        byType: typeData
+      });
+    };
+
+    fetchData();
   }, []);
 
   const COLORS = ['#2952A3', '#26DBBB', '#60A5FA', '#34D399'];

@@ -1,27 +1,104 @@
 "use client";
 
-import { store } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Download, FileSpreadsheet, Filter, ChevronLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import Link from 'next/link';
+import { getReportData } from '@/lib/actions';
+import * as XLSX from 'xlsx';
 
 export default function ReportsPage() {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState<string | null>(null);
 
-  const handleExport = (type: string) => {
+  const handleExport = async (type: string) => {
     setIsExporting(type);
-    // Simulate export generation
-    setTimeout(() => {
-      setIsExporting(null);
+    try {
+      const data = await getReportData(type);
+      
+      if (!data || data.length === 0) {
+        toast({
+          title: "No Data Found",
+          description: "There are no records to export for this report type.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      let flatData: any[] = [];
+      let filename = `Report_${type}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      // Transform data based on report type
+      if (type === 'consolidated' || type === 'wing' || type === 'ownership' || type === 'status') {
+         // This assumes 'data' is from the Asset model
+         flatData = (data as any[]).map(a => ({
+            'Serial Number': a.no_siri,
+            'Asset Type': a.jenis_asset,
+            'Brand': a.jenama,
+            'Model': a.model,
+            'Acquisition Type': a.jenis_perolehan,
+            'Year': a.tahun_perolehan,
+            'Status': a.status,
+            'Assigned To': a.staff?.nama || 'Unassigned',
+            'Location': a.lokasi,
+            'Reg No (KPA)': a.no_pendaftaran || 'N/A',
+            'Rental Code': a.kod_sewaan || 'N/A'
+         }));
+         
+         // Filter based on specific report cards if needed (simulated logic)
+         if (type === 'ownership') {
+            flatData = flatData.filter(d => d['Acquisition Type'] !== 'Hak Milik Kerajaan');
+         }
+      } 
+      else if (type === 'staff') {
+         flatData = (data as any[]).map(s => ({
+            'Staff Name': s.nama,
+            'Position': s.jawatan,
+            'Grade': s.gred,
+            'Email': s.email,
+            'Department (Bahagian)': s.bahagian,
+            'Wing': s.wing,
+            'Employment Status': s.status_perjawatan,
+            'Assets Count': s.assets?.length || 0,
+            'Printers Count': s.printers?.length || 0
+         }));
+      }
+      else if (type === 'printer') {
+         flatData = (data as any[]).map(p => ({
+            'Serial Number': p.no_siri,
+            'Brand': p.jenama,
+            'Type': p.jenis,
+            'Toner Code': p.kod_toner,
+            'Acquisition': p.jenis_perolehan,
+            'Assigned To': p.staff?.nama || 'Unassigned',
+            'Reg No': p.no_pendaftaran || 'N/A'
+         }));
+      }
+
+      // XLSX Logic
+      const worksheet = XLSX.utils.json_to_sheet(flatData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+      
+      // Trigger browser download
+      XLSX.writeFile(workbook, filename);
+
       toast({
         title: "Export Successful",
         description: `Your ${type} report has been generated and downloaded.`,
       });
-    }, 1500);
+    } catch (error) {
+      console.error('Export Error:', error);
+      toast({
+        title: "Export Failed",
+        description: "An unexpected error occurred while generating your report.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(null);
+    }
   };
 
   return (
@@ -88,13 +165,13 @@ export default function ReportsPage() {
             <p className="text-primary-foreground/80">Customize your report by selecting specific departments, wings, and date ranges. Export in .xlsx or .csv format.</p>
           </div>
           <div className="flex flex-wrap gap-4">
-            <Button size="lg" className="bg-white text-primary hover:bg-slate-100 h-12 px-8">
+            <Button size="lg" className="bg-white text-primary hover:bg-slate-100 h-12 px-8" onClick={() => handleExport('consolidated')}>
               <Filter className="mr-2 h-5 w-5" />
-              Open Custom Filters
+              Quick Full Export
             </Button>
-            <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 h-12 px-8">
+            <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 h-12 px-8" onClick={() => handleExport('consolidated')}>
               <Download className="mr-2 h-5 w-5" />
-              Download Full DB Backup
+              Download Full DB Backup (XLSX)
             </Button>
           </div>
         </CardContent>

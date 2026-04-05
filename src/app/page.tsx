@@ -3,20 +3,45 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { store } from '@/lib/store';
+import { login } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShieldCheck, User } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleLogin = (role: 'Admin' | 'User') => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
     setIsLoading(true);
-    store.login(role);
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 800);
+
+    try {
+      const user = await login(username, password);
+
+      if (user) {
+        // Since we don't have a real session yet, we still use the mock store
+        // to set the currently logged-in user in memory for the JS context.
+        store.login(user.username, password);
+        
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 800);
+      } else {
+        setIsLoading(false);
+        setError('Invalid username or password');
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+      setError('An error occurred during login');
+    }
   };
 
   return (
@@ -30,27 +55,38 @@ export default function LoginPage() {
           <CardDescription className="text-muted-foreground text-lg">IT Asset Management System</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
-          <div className="grid grid-cols-1 gap-4">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input 
+                id="username" 
+                type="text" 
+                placeholder="Enter username" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input 
+                id="password" 
+                type="password" 
+                placeholder="Enter password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-sm text-destructive font-medium">{error}</p>}
             <Button 
-              size="lg" 
-              className="h-16 text-lg font-medium transition-all hover:scale-[1.02]" 
-              onClick={() => handleLogin('Admin')}
+              type="submit"
+              className="w-full h-12 text-lg font-medium transition-all hover:scale-[1.02]" 
               disabled={isLoading}
             >
-              <ShieldCheck className="mr-3 h-6 w-6" />
-              Login as Administrator
+              {isLoading ? 'Logging in...' : 'Login'}
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="h-16 text-lg font-medium border-primary/20 hover:bg-primary/5 transition-all hover:scale-[1.02]" 
-              onClick={() => handleLogin('User')}
-              disabled={isLoading}
-            >
-              <User className="mr-3 h-6 w-6" />
-              Login as Guest User
-            </Button>
-          </div>
+          </form>
           <p className="text-center text-sm text-muted-foreground pt-4">
             Access to data is restricted based on your role.
           </p>

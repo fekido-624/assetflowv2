@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { store } from '@/lib/store';
+import { getHistory, getAssets } from '@/lib/actions';
 import { AssetHistory, Asset } from '@/lib/types';
 import { 
   Table, 
@@ -21,8 +21,13 @@ export default function HistoryPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
 
   useEffect(() => {
-    setHistory(store.getHistory().reverse());
-    setAssets(store.getAssets());
+    const fetchData = async () => {
+      const historyData = await getHistory();
+      const assetsData = await getAssets();
+      setHistory(historyData as AssetHistory[]);
+      setAssets(assetsData as Asset[]);
+    };
+    fetchData();
   }, []);
 
   return (

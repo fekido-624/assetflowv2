@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  role     String 
+}
+
+model Staff {
+  id                Int       @id @default(autoincrement())
+  nama              String
+  jawatan           String
+  gred              String
+  email             String
+  bahagian          String
+  wing              String
+  status_perjawatan String
+  assets            Asset[]
+  printers          Printer[]
+}
+
+model Asset {
+  id              Int            @id @default(autoincrement())
+  staff_id        Int?
+  staff           Staff?         @relation(fields: [staff_id], references: [id], onDelete: SetNull)
+  jenis_asset     String
+  jenama          String
+  model           String
+  jenis_perolehan String
+  nama_projek     String?
+  tahun_perolehan String
+  no_pendaftaran  String?
+  kod_sewaan      String?
+  no_siri         String
+  catatan         String?
+  status_asset    String?
+  lokasi          String
+  status          String
+  tarikh_serah    String?
+  tarikh_pulang   String?
+  history         AssetHistory[]
+}
+
+model Printer {
+  id              Int     @id @default(autoincrement())
+  staff_id        Int?
+  staff           Staff?  @relation(fields: [staff_id], references: [id], onDelete: SetNull)
+  jenis_perolehan String
+  nama_projek     String?
+  tahun_perolehan String
+  no_pendaftaran  String?
+  kod_sewaan      String?
+  no_siri         String
+  jenama          String
+  jenis           String
+  kod_toner       String
+  catatan         String?
+}
+
+model AssetHistory {
+  id                   Int     @id @default(autoincrement())
+  asset_id             Int
+  asset                Asset   @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  jenis_perolehan_lama String
+  jenis_perolehan_baru String
+  tarikh_tukar         String
+  ditukar_oleh         String
+  catatan              String?
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { store } from '@/lib/store';
+import { getStaff, addStaff, updateStaff, deleteStaff } from '@/lib/actions';
 import { Staff, Wing } from '@/lib/types';
 import { 
   Table, 
@@ -54,19 +55,22 @@ export default function StaffPage() {
     refresh();
   }, []);
 
-  const refresh = () => setStaff(store.getStaff());
+  const refresh = async () => {
+    const data = await getStaff();
+    setStaff(data as Staff[]);
+  };
 
   const filteredStaff = staff.filter(s => 
     s.nama.toLowerCase().includes(search.toLowerCase()) || 
     s.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingStaff) {
-      store.updateStaff(editingStaff.id, formData);
+      await updateStaff(editingStaff.id, formData);
     } else {
-      store.addStaff(formData);
+      await addStaff(formData);
     }
     setIsModalOpen(false);
     setEditingStaff(null);
@@ -78,13 +82,21 @@ export default function StaffPage() {
 
   const startEdit = (s: Staff) => {
     setEditingStaff(s);
-    setFormData({ ...s });
+    setFormData({
+      nama: s.nama,
+      jawatan: s.jawatan,
+      gred: s.gred,
+      email: s.email,
+      bahagian: s.bahagian,
+      wing: s.wing,
+      status_perjawatan: s.status_perjawatan
+    });
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this staff member?')) {
-      store.deleteStaff(id);
+      await deleteStaff(id);
       refresh();
     }
   };

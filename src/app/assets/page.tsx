@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { store } from '@/lib/store';
+import { getAssets, getStaff, addAsset, updateAsset, deleteAsset, getHistory } from '@/lib/actions';
 import { Asset, AssetType, AcquisitionType, AssetStatus, Staff } from '@/lib/types';
 import { 
   Table, 
@@ -66,13 +67,15 @@ export default function AssetsPage() {
     refresh();
   }, []);
 
-  const refresh = () => {
-    setAssets(store.getAssets());
-    setStaffList(store.getStaff());
+  const refresh = async () => {
+    const assetData = await getAssets();
+    const staffData = await getStaff();
+    setAssets(assetData as Asset[]);
+    setStaffList(staffData as Staff[]);
   };
 
-  const filteredAssets = assets.filter(a => {
-    const staff = staffList.find(s => s.id === a.staff_id);
+  const filteredAssets = assets.filter((a: Asset) => {
+    const staff = staffList.find((s: Staff) => s.id === a.staff_id);
     const searchTerm = search.toLowerCase();
     return (
       a.no_siri.toLowerCase().includes(searchTerm) ||
@@ -84,12 +87,12 @@ export default function AssetsPage() {
     );
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingAsset) {
-      store.updateAsset(editingAsset.id, formData, store.getCurrentUser()?.username || 'System');
+      await updateAsset(editingAsset.id, formData, store.getCurrentUser()?.username || 'System');
     } else {
-      store.addAsset(formData);
+      await addAsset(formData);
     }
     setIsModalOpen(false);
     setEditingAsset(null);
@@ -98,13 +101,25 @@ export default function AssetsPage() {
 
   const startEdit = (a: Asset) => {
     setEditingAsset(a);
-    setFormData({ ...a });
+    setFormData({
+      staff_id: a.staff_id,
+      jenis_asset: a.jenis_asset,
+      jenama: a.jenama,
+      model: a.model,
+      jenis_perolehan: a.jenis_perolehan,
+      tahun_perolehan: a.tahun_perolehan,
+      no_siri: a.no_siri,
+      lokasi: a.lokasi,
+      status: a.status,
+      no_pendaftaran: a.no_pendaftaran || '',
+      kod_sewaan: a.kod_sewaan || ''
+    });
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Delete this asset?')) {
-      store.deleteAsset(id);
+      await deleteAsset(id);
       refresh();
     }
   };
@@ -114,13 +129,13 @@ export default function AssetsPage() {
     setSummaryModalOpen(true);
     setSummary(null);
     try {
-      const history = store.getHistory(assetId);
+      const history = await getHistory(assetId);
       if (history.length === 0) {
         setSummary("No history available for this asset yet.");
       } else {
         const result = await summarizeAssetHistory({
           assetId,
-          assetHistory: history
+          assetHistory: history as any[]
         });
         setSummary(result.summary);
       }
@@ -287,8 +302,8 @@ export default function AssetsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAssets.map((a) => {
-              const staff = staffList.find(s => s.id === a.staff_id);
+            {filteredAssets.map((a: Asset) => {
+              const staff = staffList.find((s: Staff) => s.id === a.staff_id);
               return (
                 <TableRow key={a.id} className="hover:bg-accent/5 transition-colors">
                   <TableCell>
