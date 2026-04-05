@@ -12,7 +12,9 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { History, ArrowRight, UserCircle } from 'lucide-react';
+import { History, ArrowRight, UserCircle, ChevronLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<AssetHistory[]>([]);
@@ -25,10 +27,18 @@ export default function HistoryPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold text-primary font-headline">Audit Trail</h1>
-        <p className="text-muted-foreground">Historical records of asset acquisition type changes.</p>
-      </header>
+      <div className="flex flex-col gap-4">
+        <Button variant="ghost" size="sm" asChild className="w-fit -ml-2 text-muted-foreground hover:text-primary transition-colors">
+          <Link href="/dashboard" className="flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+        <header>
+          <h1 className="text-3xl font-bold text-primary font-headline">Audit Trail</h1>
+          <p className="text-muted-foreground">Historical records of asset acquisition type changes.</p>
+        </header>
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
         <Table>

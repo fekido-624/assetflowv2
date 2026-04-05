@@ -29,8 +29,9 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Search, Plus, Edit2, Trash2, UserPlus } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, UserPlus, ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -90,76 +91,84 @@ export default function StaffPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-primary font-headline">Staff Directory</h1>
-          <p className="text-muted-foreground">Manage organization personnel and contact details.</p>
+      <div className="flex flex-col gap-4">
+        <Button variant="ghost" size="sm" asChild className="w-fit -ml-2 text-muted-foreground hover:text-primary transition-colors">
+          <Link href="/dashboard" className="flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-primary font-headline">Staff Directory</h1>
+            <p className="text-muted-foreground">Manage organization personnel and contact details.</p>
+          </div>
+          
+          {userRole === 'Admin' && (
+            <Dialog open={isModalOpen} onOpenChange={(open) => {
+              setIsModalOpen(open);
+              if (!open) setEditingStaff(null);
+            }}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 px-6">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Add New Staff
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold flex items-center space-x-2">
+                    <UserPlus className="text-primary w-6 h-6" />
+                    <span>{editingStaff ? 'Edit Staff' : 'Add Staff Member'}</span>
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2 col-span-2">
+                      <Label>Full Name</Label>
+                      <Input required value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Position (Jawatan)</Label>
+                      <Input required value={formData.jawatan} onChange={e => setFormData({...formData, jawatan: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Grade (Gred)</Label>
+                      <Input required value={formData.gred} onChange={e => setFormData({...formData, gred: e.target.value})} />
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label>Email</Label>
+                      <Input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Department (Bahagian)</Label>
+                      <Input required value={formData.bahagian} onChange={e => setFormData({...formData, bahagian: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Wing</Label>
+                      <Select value={formData.wing} onValueChange={(v: Wing) => setFormData({...formData, wing: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Wing 1">Wing 1</SelectItem>
+                          <SelectItem value="Wing 2">Wing 2</SelectItem>
+                          <SelectItem value="Wing 3">Wing 3</SelectItem>
+                          <SelectItem value="Wing 4">Wing 4</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <Label>Employment Status</Label>
+                      <Input required value={formData.status_perjawatan} onChange={e => setFormData({...formData, status_perjawatan: e.target.value})} />
+                    </div>
+                  </div>
+                  <DialogFooter className="pt-6">
+                    <Button type="submit" className="w-full h-12 text-lg">{editingStaff ? 'Save Changes' : 'Create Staff Record'}</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
-        
-        {userRole === 'Admin' && (
-          <Dialog open={isModalOpen} onOpenChange={(open) => {
-            setIsModalOpen(open);
-            if (!open) setEditingStaff(null);
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 px-6">
-                <Plus className="mr-2 h-5 w-5" />
-                Add New Staff
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold flex items-center space-x-2">
-                  <UserPlus className="text-primary w-6 h-6" />
-                  <span>{editingStaff ? 'Edit Staff' : 'Add Staff Member'}</span>
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2 col-span-2">
-                    <Label>Full Name</Label>
-                    <Input required value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Position (Jawatan)</Label>
-                    <Input required value={formData.jawatan} onChange={e => setFormData({...formData, jawatan: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Grade (Gred)</Label>
-                    <Input required value={formData.gred} onChange={e => setFormData({...formData, gred: e.target.value})} />
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <Label>Email</Label>
-                    <Input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Department (Bahagian)</Label>
-                    <Input required value={formData.bahagian} onChange={e => setFormData({...formData, bahagian: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Wing</Label>
-                    <Select value={formData.wing} onValueChange={(v: Wing) => setFormData({...formData, wing: v})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Wing 1">Wing 1</SelectItem>
-                        <SelectItem value="Wing 2">Wing 2</SelectItem>
-                        <SelectItem value="Wing 3">Wing 3</SelectItem>
-                        <SelectItem value="Wing 4">Wing 4</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <Label>Employment Status</Label>
-                    <Input required value={formData.status_perjawatan} onChange={e => setFormData({...formData, status_perjawatan: e.target.value})} />
-                  </div>
-                </div>
-                <DialogFooter className="pt-6">
-                  <Button type="submit" className="w-full h-12 text-lg">{editingStaff ? 'Save Changes' : 'Create Staff Record'}</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">

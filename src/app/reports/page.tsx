@@ -3,9 +3,10 @@
 import { store } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Download, FileSpreadsheet, Filter, CheckCircle2 } from 'lucide-react';
+import { Download, FileSpreadsheet, Filter, ChevronLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function ReportsPage() {
   const { toast } = useToast();
@@ -25,10 +26,18 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <header>
-        <h1 className="text-3xl font-bold text-primary font-headline">Inventory Reports</h1>
-        <p className="text-muted-foreground">Generate and export filtered asset data for administrative use.</p>
-      </header>
+      <div className="flex flex-col gap-4">
+        <Button variant="ghost" size="sm" asChild className="w-fit -ml-2 text-muted-foreground hover:text-primary transition-colors">
+          <Link href="/dashboard" className="flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+        <header>
+          <h1 className="text-3xl font-bold text-primary font-headline">Inventory Reports</h1>
+          <p className="text-muted-foreground">Generate and export filtered asset data for administrative use.</p>
+        </header>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ReportCard 

@@ -29,10 +29,11 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Search, Plus, Edit2, Trash2, Laptop, Info, BrainCircuit, Loader2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Laptop, Info, BrainCircuit, Loader2, ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { summarizeAssetHistory } from '@/ai/flows/asset-history-summarizer';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -132,125 +133,133 @@ export default function AssetsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-primary font-headline">IT Assets</h1>
-          <p className="text-muted-foreground">Manage hardware inventory and assignments.</p>
-        </div>
-        
-        {userRole === 'Admin' && (
-          <Dialog open={isModalOpen} onOpenChange={(open) => {
-            setIsModalOpen(open);
-            if (!open) setEditingAsset(null);
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 px-6">
-                <Plus className="mr-2 h-5 w-5" />
-                Register Asset
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold flex items-center space-x-2">
-                  <Laptop className="text-primary w-6 h-6" />
-                  <span>{editingAsset ? 'Edit Asset' : 'Register New Asset'}</span>
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Assign to Staff</Label>
-                    <Select 
-                      value={formData.staff_id?.toString() || 'unassigned'} 
-                      onValueChange={(v) => setFormData({...formData, staff_id: v === 'unassigned' ? null : parseInt(v)})}
-                    >
-                      <SelectTrigger><SelectValue placeholder="Select Staff" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {staffList.map(s => (
-                          <SelectItem key={s.id} value={s.id.toString()}>{s.nama}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Asset Type</Label>
-                    <Select value={formData.jenis_asset} onValueChange={(v: AssetType) => setFormData({...formData, jenis_asset: v})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PC">PC</SelectItem>
-                        <SelectItem value="Laptop">Laptop</SelectItem>
-                        <SelectItem value="Phone">Phone</SelectItem>
-                        <SelectItem value="Tablet">Tablet</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Brand (Jenama)</Label>
-                    <Input required value={formData.jenama} onChange={e => setFormData({...formData, jenama: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Model</Label>
-                    <Input required value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Acquisition Type</Label>
-                    <Select value={formData.jenis_perolehan} onValueChange={(v: AcquisitionType) => setFormData({...formData, jenis_perolehan: v})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sewaan Berpusat">Sewaan Berpusat</SelectItem>
-                        <SelectItem value="Sewaan Sendiri">Sewaan Sendiri</SelectItem>
-                        <SelectItem value="Hak Milik Kerajaan">Hak Milik Kerajaan</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Year (Tahun Perolehan)</Label>
-                    <Input required value={formData.tahun_perolehan} onChange={e => setFormData({...formData, tahun_perolehan: e.target.value})} />
-                  </div>
-                  
-                  {formData.jenis_perolehan === 'Hak Milik Kerajaan' && (
-                    <div className="space-y-2 col-span-2">
-                      <Label>Registration No (Kew PA)</Label>
-                      <Input required value={formData.no_pendaftaran} onChange={e => setFormData({...formData, no_pendaftaran: e.target.value})} />
+      <div className="flex flex-col gap-4">
+        <Button variant="ghost" size="sm" asChild className="w-fit -ml-2 text-muted-foreground hover:text-primary transition-colors">
+          <Link href="/dashboard" className="flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-primary font-headline">IT Assets</h1>
+            <p className="text-muted-foreground">Manage hardware inventory and assignments.</p>
+          </div>
+          
+          {userRole === 'Admin' && (
+            <Dialog open={isModalOpen} onOpenChange={(open) => {
+              setIsModalOpen(open);
+              if (!open) setEditingAsset(null);
+            }}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 px-6">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Register Asset
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold flex items-center space-x-2">
+                    <Laptop className="text-primary w-6 h-6" />
+                    <span>{editingAsset ? 'Edit Asset' : 'Register New Asset'}</span>
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Assign to Staff</Label>
+                      <Select 
+                        value={formData.staff_id?.toString() || 'unassigned'} 
+                        onValueChange={(v) => setFormData({...formData, staff_id: v === 'unassigned' ? null : parseInt(v)})}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Select Staff" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unassigned">Unassigned</SelectItem>
+                          {staffList.map(s => (
+                            <SelectItem key={s.id} value={s.id.toString()}>{s.nama}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
-                  
-                  {formData.jenis_perolehan.includes('Sewaan') && (
-                    <div className="space-y-2 col-span-2">
-                      <Label>Rental Code (Kod Sewaan)</Label>
-                      <Input required value={formData.kod_sewaan} onChange={e => setFormData({...formData, kod_sewaan: e.target.value})} />
+                    <div className="space-y-2">
+                      <Label>Asset Type</Label>
+                      <Select value={formData.jenis_asset} onValueChange={(v: AssetType) => setFormData({...formData, jenis_asset: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PC">PC</SelectItem>
+                          <SelectItem value="Laptop">Laptop</SelectItem>
+                          <SelectItem value="Phone">Phone</SelectItem>
+                          <SelectItem value="Tablet">Tablet</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  )}
+                    <div className="space-y-2">
+                      <Label>Brand (Jenama)</Label>
+                      <Input required value={formData.jenama} onChange={e => setFormData({...formData, jenama: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Model</Label>
+                      <Input required value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Acquisition Type</Label>
+                      <Select value={formData.jenis_perolehan} onValueChange={(v: AcquisitionType) => setFormData({...formData, jenis_perolehan: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sewaan Berpusat">Sewaan Berpusat</SelectItem>
+                          <SelectItem value="Sewaan Sendiri">Sewaan Sendiri</SelectItem>
+                          <SelectItem value="Hak Milik Kerajaan">Hak Milik Kerajaan</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Year (Tahun Perolehan)</Label>
+                      <Input required value={formData.tahun_perolehan} onChange={e => setFormData({...formData, tahun_perolehan: e.target.value})} />
+                    </div>
+                    
+                    {formData.jenis_perolehan === 'Hak Milik Kerajaan' && (
+                      <div className="space-y-2 col-span-2">
+                        <Label>Registration No (Kew PA)</Label>
+                        <Input required value={formData.no_pendaftaran} onChange={e => setFormData({...formData, no_pendaftaran: e.target.value})} />
+                      </div>
+                    )}
+                    
+                    {formData.jenis_perolehan.includes('Sewaan') && (
+                      <div className="space-y-2 col-span-2">
+                        <Label>Rental Code (Kod Sewaan)</Label>
+                        <Input required value={formData.kod_sewaan} onChange={e => setFormData({...formData, kod_sewaan: e.target.value})} />
+                      </div>
+                    )}
 
-                  <div className="space-y-2">
-                    <Label>Serial Number</Label>
-                    <Input required value={formData.no_siri} onChange={e => setFormData({...formData, no_siri: e.target.value})} />
+                    <div className="space-y-2">
+                      <Label>Serial Number</Label>
+                      <Input required value={formData.no_siri} onChange={e => setFormData({...formData, no_siri: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Location</Label>
+                      <Input required value={formData.lokasi} onChange={e => setFormData({...formData, lokasi: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Asset Status</Label>
+                      <Select value={formData.status} onValueChange={(v: AssetStatus) => setFormData({...formData, status: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Aktif">Aktif</SelectItem>
+                          <SelectItem value="Rosak">Rosak</SelectItem>
+                          <SelectItem value="Lupus">Lupus</SelectItem>
+                          <SelectItem value="Dipinjam">Dipinjam</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Location</Label>
-                    <Input required value={formData.lokasi} onChange={e => setFormData({...formData, lokasi: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Asset Status</Label>
-                    <Select value={formData.status} onValueChange={(v: AssetStatus) => setFormData({...formData, status: v})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Aktif">Aktif</SelectItem>
-                        <SelectItem value="Rosak">Rosak</SelectItem>
-                        <SelectItem value="Lupus">Lupus</SelectItem>
-                        <SelectItem value="Dipinjam">Dipinjam</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter className="pt-6">
-                  <Button type="submit" className="w-full h-12 text-lg">Save Asset Details</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
+                  <DialogFooter className="pt-6">
+                    <Button type="submit" className="w-full h-12 text-lg">Save Asset Details</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">

@@ -29,8 +29,9 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Search, Plus, Edit2, Trash2, Printer as PrinterIcon } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Printer as PrinterIcon, ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function PrintersPage() {
   const [printers, setPrinters] = useState<Printer[]>([]);
@@ -90,76 +91,84 @@ export default function PrintersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-primary font-headline">Printer Management</h1>
-          <p className="text-muted-foreground">Monitor printing equipment and consumable requirements.</p>
+      <div className="flex flex-col gap-4">
+        <Button variant="ghost" size="sm" asChild className="w-fit -ml-2 text-muted-foreground hover:text-primary transition-colors">
+          <Link href="/dashboard" className="flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-primary font-headline">Printer Management</h1>
+            <p className="text-muted-foreground">Monitor printing equipment and consumable requirements.</p>
+          </div>
+          
+          {userRole === 'Admin' && (
+            <Dialog open={isModalOpen} onOpenChange={(open) => {
+              setIsModalOpen(open);
+              if (!open) setEditingPrinter(null);
+            }}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 px-6">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Register Printer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold flex items-center space-x-2">
+                    <PrinterIcon className="text-primary w-6 h-6" />
+                    <span>{editingPrinter ? 'Edit Printer' : 'Register New Printer'}</span>
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Assignee</Label>
+                      <Select value={formData.staff_id?.toString() || 'unassigned'} onValueChange={(v) => setFormData({...formData, staff_id: v === 'unassigned' ? null : parseInt(v)})}>
+                        <SelectTrigger><SelectValue placeholder="Select Staff" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unassigned">Unassigned</SelectItem>
+                          {staffList.map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.nama}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Acquisition Type</Label>
+                      <Select value={formData.jenis_perolehan} onValueChange={(v: AcquisitionType) => setFormData({...formData, jenis_perolehan: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sewaan Berpusat">Sewaan Berpusat</SelectItem>
+                          <SelectItem value="Hak Milik Kerajaan">Hak Milik Kerajaan</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Brand (Jenama)</Label>
+                      <Input required value={formData.jenama} onChange={e => setFormData({...formData, jenama: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Type (Model/Jenis)</Label>
+                      <Input required value={formData.jenis} onChange={e => setFormData({...formData, jenis: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Toner Code</Label>
+                      <Input required value={formData.kod_toner} onChange={e => setFormData({...formData, kod_toner: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Serial Number</Label>
+                      <Input required value={formData.no_siri} onChange={e => setFormData({...formData, no_siri: e.target.value})} />
+                    </div>
+                  </div>
+                  <DialogFooter className="pt-6">
+                    <Button type="submit" className="w-full h-12 text-lg">Save Printer Info</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
-        
-        {userRole === 'Admin' && (
-          <Dialog open={isModalOpen} onOpenChange={(open) => {
-            setIsModalOpen(open);
-            if (!open) setEditingPrinter(null);
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 px-6">
-                <Plus className="mr-2 h-5 w-5" />
-                Register Printer
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold flex items-center space-x-2">
-                  <PrinterIcon className="text-primary w-6 h-6" />
-                  <span>{editingPrinter ? 'Edit Printer' : 'Register New Printer'}</span>
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Assignee</Label>
-                    <Select value={formData.staff_id?.toString() || 'unassigned'} onValueChange={(v) => setFormData({...formData, staff_id: v === 'unassigned' ? null : parseInt(v)})}>
-                      <SelectTrigger><SelectValue placeholder="Select Staff" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {staffList.map(s => <SelectItem key={s.id} value={s.id.toString()}>{s.nama}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Acquisition Type</Label>
-                    <Select value={formData.jenis_perolehan} onValueChange={(v: AcquisitionType) => setFormData({...formData, jenis_perolehan: v})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sewaan Berpusat">Sewaan Berpusat</SelectItem>
-                        <SelectItem value="Hak Milik Kerajaan">Hak Milik Kerajaan</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Brand (Jenama)</Label>
-                    <Input required value={formData.jenama} onChange={e => setFormData({...formData, jenama: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Type (Model/Jenis)</Label>
-                    <Input required value={formData.jenis} onChange={e => setFormData({...formData, jenis: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Toner Code</Label>
-                    <Input required value={formData.kod_toner} onChange={e => setFormData({...formData, kod_toner: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Serial Number</Label>
-                    <Input required value={formData.no_siri} onChange={e => setFormData({...formData, no_siri: e.target.value})} />
-                  </div>
-                </div>
-                <DialogFooter className="pt-6">
-                  <Button type="submit" className="w-full h-12 text-lg">Save Printer Info</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
